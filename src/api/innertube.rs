@@ -1,4 +1,7 @@
 //! Innertube (YouTube internal API) client: search, browse, watch-next, comments, resolve.
+#[path = "data_api.rs"]
+mod data_api;
+
 use super::http;
 use super::json::*;
 use super::types::*;
@@ -551,6 +554,11 @@ impl SearchFilter {
 }
 
 pub fn search(query: &str, filter: &SearchFilter) -> Result<Page> {
+    if !filter.four_k && !filter.hdr {
+        if let Some(key) = data_api::api_key() {
+            return data_api::search(&key, query, filter);
+        }
+    }
     let mut body = json!({ "query": query });
     if let Some(p) = filter.encode() {
         body["params"] = json!(p);
@@ -560,6 +568,9 @@ pub fn search(query: &str, filter: &SearchFilter) -> Result<Page> {
 }
 
 pub fn search_continue(token: &str) -> Result<Page> {
+    if let Some(token) = token.strip_prefix(data_api::TOKEN_PREFIX) {
+        return data_api::search_continue(token);
+    }
     let r = call("search", json!({ "continuation": token }))?;
     Ok(collect_items(&r))
 }
