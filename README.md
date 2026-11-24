@@ -112,6 +112,28 @@ goes through libmpv, so it starts fast and scrolls smoothly even with big feeds.
 **Keeps itself up to date**
 - Checks for new releases at startup and installs them in one click, and can update yt-dlp for you. Every download is checked against its SHA-256 before it is used
 
+## Optional YouTube Data API v3 search
+
+Enable **YouTube Data API v3** in your Google Cloud project, then create an API
+key and restrict it to that API. Set `STREAMTUBE_YOUTUBE_API_KEY` in the
+environment used to launch Stream Tube. For example, on Linux:
+
+```bash
+read -rsp 'YouTube Data API key: ' STREAMTUBE_YOUTUBE_API_KEY
+echo
+export STREAMTUBE_YOUTUBE_API_KEY
+./target/release/streamtube
+```
+
+Close any running instance before launching with the key. The key is sent to
+Google in a request header and is not written to app settings.
+
+With a key, the search results page and subsequent pages use Google's official
+API. Each page uses search quota. API results can differ from YouTube's own
+search ranking. Searches without a key and searches using the 4K or HDR filters
+use the original backend. Search suggestions, channel pages, feeds, sign-in and
+playback continue using their existing implementations.
+
 ## Performance
 
 Stream Tube versus youtube.com in Microsoft Edge (clean profile, no extensions) on
