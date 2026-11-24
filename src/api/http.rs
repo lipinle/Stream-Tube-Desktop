@@ -54,7 +54,15 @@ pub fn get_json(url: &str) -> Result<Value> {
 
 /// Returns (status, json)
 pub fn get_json_status(url: &str) -> Result<(u16, Value)> {
-    let mut resp = agent().get(url).header("Accept", "application/json").call()?;
+    get_json_status_with_headers(url, &[])
+}
+
+pub(super) fn get_json_status_with_headers(url: &str, headers: &[(&str, &str)]) -> Result<(u16, Value)> {
+    let mut request = agent().get(url).header("Accept", "application/json");
+    for (name, value) in headers {
+        request = request.header(*name, *value);
+    }
+    let mut resp = request.call()?;
     let status = resp.status().as_u16();
     let text = resp.body_mut().read_to_string().unwrap_or_default();
     Ok((status, serde_json::from_str(&text).unwrap_or(Value::Null)))
